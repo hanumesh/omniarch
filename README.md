@@ -115,3 +115,6 @@ CORS: Ensure you aren't trying to call the API directly from a local file:// pat
 
 
 API Key: Verify that YOUR_GROQ_API_KEY has been replaced with a valid key from your Groq Console.
+
+
+https://claude.ai/chat/e52cfcba-2fec-469e-aa9c-f4cc6b27fd42?artifactId=remixed-b724245c
