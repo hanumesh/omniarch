@@ -94,3 +94,24 @@ Key Features:
 Whether you're an architect looking to wow clients or a designer seeking faster iteration, OmniArch is built to bring your ideas to life.
 
 Check out the live app here: https://omniarch.lovable.app/
+
+
+
+Recommended Replacement Models
+Based on your original architecture's need for "high-context orchestration", here are the best current alternatives available on Groq:
+
+llama-3.3-70b-specdec: This is the direct successor for high-performance reasoning and large context tasks. It is highly recommended for the multi-domain agent orchestration your app performs.
+
+llama-3.1-8b-instant: Use this if you want maximum speed and lower latency, though it may be slightly less "smart" at complex cross-domain synthesis.
+
+
+llama-3.2-11b-vision-preview: If you still intend to use the image upload features of your UI, you must use this model, as the standard Llama 3.1/3.3 models are text-only.
+
+Reminder on Connection Issues
+If you still see errors after updating the model name:
+
+
+CORS: Ensure you aren't trying to call the API directly from a local file:// path in your browser, as Groq's security policy will block it. You should ideally use a local development server or a proxy.
+
+
+API Key: Verify that YOUR_GROQ_API_KEY has been replaced with a valid key from your Groq Console.
