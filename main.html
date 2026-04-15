@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OmniArch — Multi-Domain Intelligence Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080D18;--surface:#0D1626;--card:#141F35;--card-hover:#1A2840;
+  --border:#1E2E47;--border-hi:#2A3F5E;
+  --t1:#D8E6F3;--t2:#7A98B5;--t3:#3A5470;
+  --accent:#00C9A7;--accent-dim:rgba(0,201,167,.14);
+  --chroma:#7C3AED;--chroma-dim:rgba(124,58,237,.15);
+  --bfsi:#F59E0B;--health:#10B981;--pharma:#818CF8;
+  --retail:#F43F5E;--mfg:#F97316;--cloud:#38BDF8;--ea:#A78BFA;
+  --radius:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:13px;
+  color:var(--t1);background:var(--bg);height:100vh;overflow:hidden;display:flex}
+.app{display:flex;width:100%;height:100vh}
+
+/* ─── SIDEBAR ─── */
+.sidebar{width:224px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.logo-bar{padding:14px 14px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-glyph{width:32px;height:32px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--chroma) 100%);
+  display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-n{font-size:14px;font-weight:600;letter-spacing:-.02em}
+.logo-s{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;font-weight:500}
+.sb-scroll{flex:1;overflow-y:auto;padding:10px 10px 6px;display:flex;flex-direction:column;gap:14px}
+.sb-scroll::-webkit-scrollbar{width:3px}
+.sb-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sec-lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:5px}
+.agent-card{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:var(--radius);
+  cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:2px}
+.agent-card:hover{background:var(--card)}
+.agent-card.on{background:var(--card);border-color:var(--border)}
+.ag-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;opacity:.25;transition:opacity .15s}
+.agent-card.on .ag-dot{opacity:1}
+.ag-em{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.ag-info{flex:1;min-width:0}
+.ag-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-tag{font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-tgl{width:27px;height:15px;border-radius:8px;background:var(--border);position:relative;
+  flex-shrink:0;transition:background .15s}
+.agent-card.on .ag-tgl{background:var(--accent)}
+.ag-tgl::after{content:'';position:absolute;width:11px;height:11px;background:var(--surface);
+  border-radius:50%;top:2px;left:2px;transition:transform .15s}
+.agent-card.on .ag-tgl::after{transform:translateX(12px)}
+
+/* ─── CHROMADB PANEL ─── */
+.chroma-box{background:var(--chroma-dim);border:1px solid rgba(124,58,237,.3);
+  border-radius:var(--radius);padding:9px 10px;margin-bottom:2px}
+.chroma-hdr{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.chroma-logo{font-size:13px}
+.chroma-ttl{font-size:11px;font-weight:600;color:#B695FA}
+.chroma-stat{margin-left:auto;font-size:9px;font-weight:700;
+  padding:1px 6px;border-radius:10px;background:rgba(124,58,237,.25);color:#B695FA;
+  border:1px solid rgba(124,58,237,.4)}
+.coll-row{display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid rgba(124,58,237,.12)}
+.coll-row:last-child{border-bottom:none}
+.coll-icon{font-size:10px;width:14px;text-align:center}
+.coll-name{flex:1;font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coll-cnt{font-size:9px;padding:1px 5px;border-radius:8px;
+  background:var(--card);color:var(--t3);border:1px solid var(--border);white-space:nowrap}
+.coll-rm{background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;
+  padding:0 1px;line-height:1;transition:color .15s}
+.coll-rm:hover{color:var(--retail)}
+.chroma-empty{font-size:10px;color:var(--t3);text-align:center;padding:6px 0}
+.chroma-stats-bar{display:flex;gap:6px;margin-top:7px;padding-top:7px;border-top:1px solid rgba(124,58,237,.12)}
+.cs-item{flex:1;text-align:center}
+.cs-val{font-size:13px;font-weight:600;color:#B695FA}
+.cs-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}
+.sim-bar-wrap{margin-top:7px;padding-top:6px;border-top:1px solid rgba(124,58,237,.12)}
+.sim-bar-lbl{font-size:9px;color:var(--t3);margin-bottom:4px;display:flex;justify-content:space-between}
+.sim-bar-bg{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.sim-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--chroma),var(--accent));transition:width .5s ease}
+.kb-item{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;
+  cursor:default;margin-bottom:2px;transition:background .15s}
+.kb-item:hover{background:var(--card)}
+.kb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.kb-lbl{flex:1;font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb-type{font-size:9px;padding:1px 5px;border-radius:4px;background:var(--border);
+  color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
+.kb-rm{background:none;border:none;cursor:pointer;color:var(--t3);font-size:12px;
+  padding:0 1px;line-height:1;transition:color .15s;flex-shrink:0}
+.kb-rm:hover{color:var(--retail)}
+.add-src{width:100%;display:flex;align-items:center;gap:6px;padding:5px 7px;
+  border:1px dashed var(--border);border-radius:var(--radius);background:transparent;
+  color:var(--t3);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:3px}
+.add-src:hover{border-color:var(--accent);color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:11px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);
+  cursor:pointer;transition:all .15s;color:var(--t3);background:transparent;
+  font-family:inherit;white-space:nowrap}
+.chip:hover{border-color:var(--border-hi);color:var(--t2)}
+.chip.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.chip.chroma-chip.on{background:var(--chroma-dim);border-color:var(--chroma);color:#B695FA}
+
+/* ─── MAIN ─── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.chat-hdr{padding:11px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);flex-shrink:0}
+.chat-ttl{font-size:14px;font-weight:600;letter-spacing:-.02em}
+.chat-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.hdr-badges{display:flex;gap:6px;align-items:center}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;letter-spacing:.02em;white-space:nowrap;border:1px solid}
+.bg{background:rgba(16,185,129,.12);color:#10B981;border-color:rgba(16,185,129,.3)}
+.ba{background:rgba(245,158,11,.12);color:#F59E0B;border-color:rgba(245,158,11,.3)}
+.bb{background:rgba(56,189,248,.12);color:#38BDF8;border-color:rgba(56,189,248,.3)}
+.bv{background:rgba(124,58,237,.15);color:#B695FA;border-color:rgba(124,58,237,.35)}
+.trc-btn{width:28px;height:28px;border-radius:6px;background:var(--card);
+  border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;
+  justify-content:center;color:var(--t2);font-size:14px;transition:all .15s}
+.trc-btn:hover{border-color:var(--border-hi);color:var(--t1)}
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:13px}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.msg{display:flex;gap:9px;max-width:100%}
+.msg.user{flex-direction:row-reverse}
+.avatar{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.av-a{background:linear-gradient(135deg,var(--accent),var(--chroma));color:#fff}
+.av-u{background:var(--card);color:var(--t2);border:1px solid var(--border)}
+.bubble{padding:10px 14px;border-radius:12px;max-width:calc(100% - 46px);
+  font-size:13px;line-height:1.65}
+.bbl-a{background:var(--card);border:1px solid var(--border);border-top-left-radius:3px;color:var(--t1)}
+.bbl-u{background:linear-gradient(135deg,#1A4FD0,var(--chroma));color:#fff;border-top-right-radius:3px}
+.rag-strip{display:flex;align-items:center;gap:6px;padding:5px 9px;
+  background:var(--chroma-dim);border:1px solid rgba(124,58,237,.25);
+  border-radius:6px;margin-bottom:8px;flex-wrap:wrap}
+.rag-ico{font-size:11px}
+.rag-lbl{font-size:10px;color:#B695FA;font-weight:500}
+.rag-chunk{font-size:10px;padding:1px 6px;border-radius:8px;
+  background:rgba(124,58,237,.2);color:#C4A6FF;border:1px solid rgba(124,58,237,.3);cursor:default}
+.img-prev{max-width:160px;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:6px}
+.srcs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.src-tag{font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid;font-weight:500;cursor:default}
+.thinking-bar{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.attach-bar{padding:0 14px 5px;display:flex;flex-wrap:wrap;gap:5px;flex-shrink:0}
+.a-pill{display:flex;align-items:center;gap:5px;padding:3px 8px 3px 9px;
+  background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--t2)}
+.a-pill-img{width:20px;height:20px;border-radius:3px;object-fit:cover}
+.a-rm{background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;
+  line-height:1;padding:0;font-family:inherit;transition:color .15s}
+.a-rm:hover{color:var(--retail)}
+.input-area{border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.input-box{display:flex;align-items:flex-end;gap:7px;padding:10px 14px}
+textarea{flex:1;resize:none;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 12px;font-size:13px;font-family:inherit;
+  color:var(--t1);outline:none;transition:border-color .15s;line-height:1.5;max-height:100px}
+textarea:focus{border-color:var(--border-hi)}
+textarea::placeholder{color:var(--t3)}
+.iacts{display:flex;gap:4px;flex-shrink:0}
+.iact{width:31px;height:31px;border-radius:6px;border:1px solid var(--border);
+  background:var(--card);cursor:pointer;display:flex;align-items:center;
+  justify-content:center;font-size:13px;transition:all .15s;flex-shrink:0}
+.iact:hover{border-color:var(--border-hi);background:var(--card-hover)}
+.send-btn{width:31px;height:31px;border-radius:6px;background:var(--accent);border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.send-btn:hover{filter:brightness(1.1)}.send-btn:disabled{background:var(--border);cursor:default}
+.si{width:13px;height:13px;fill:var(--bg)}
+.input-foot{padding:0 14px 8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hint-btn{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border);
+  background:transparent;color:var(--t3);cursor:pointer;font-family:inherit;transition:all .15s}
+.hint-btn:hover{border-color:var(--border-hi);color:var(--t2)}
+.tool-stat{font-size:10px;color:var(--t3);margin-left:auto}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:10px;padding:24px}
+.ei{width:48px;height:48px;border-radius:13px;
+  background:linear-gradient(135deg,var(--accent-dim),var(--chroma-dim));
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:4px}
+.et{font-size:15px;font-weight:600;letter-spacing:-.02em;text-align:center}
+.es{font-size:12px;color:var(--t3);text-align:center;line-height:1.6;max-width:360px}
+.sugs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px}
+.sug{font-size:11px;padding:5px 11px;border:1px solid var(--border);border-radius:20px;
+  cursor:pointer;color:var(--t2);background:transparent;transition:all .15s;font-family:inherit}
+.sug:hover{border-color:var(--border-hi);color:var(--t1);background:var(--card)}
+pre{white-space:pre-wrap;word-wrap:break-word;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:6px;
+  padding:9px 12px;margin:5px 0;color:#93C5FD}
+.dag-hdr{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:2px 6px;border-radius:4px;display:inline-block;margin:4px 0 2px}
+
+/* ─── TRACE ─── */
+.trace-panel{width:260px;flex-shrink:0;background:var(--surface);
+  border-left:1px solid var(--border);display:flex;flex-direction:column;
+  overflow:hidden;transition:width .22s ease}
+.trace-panel.collapsed{width:0;border-left:none;overflow:hidden}
+.trc-hdr{padding:11px 13px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.trc-ttl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.07em}
+.trc-clr{font-size:10px;color:var(--t3);cursor:pointer;background:none;border:none;font-family:inherit;transition:color .15s}
+.trc-clr:hover{color:var(--t2)}
+.trc-body{flex:1;overflow-y:auto;padding:10px}
+.trc-body::-webkit-scrollbar{width:3px}
+.trc-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.trc-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100px;color:var(--t3);font-size:11px;text-align:center;gap:6px}
+.trc-step{display:flex;gap:7px;margin-bottom:9px;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.trc-ico{width:20px;height:20px;border-radius:50%;background:var(--card);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:9px;flex-shrink:0;margin-top:1px}
+.trc-ico.chroma{background:var(--chroma-dim);border-color:rgba(124,58,237,.4)}
+.trc-lbl{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:2px;line-height:1.3}
+.trc-det{font-size:10px;color:var(--t3);line-height:1.4}
+.trc-dbadge{display:inline-flex;align-items:center;font-size:9px;font-weight:700;
+  padding:1px 5px;border-radius:3px;border:1px solid;margin:2px 2px 0 0;
+  text-transform:uppercase;letter-spacing:.04em}
+.trc-sim{display:flex;align-items:center;gap:4px;margin-top:3px}
+.trc-sim-bar{flex:1;height:3px;border-radius:2px;background:var(--border);overflow:hidden}
+.trc-sim-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--chroma),var(--accent))}
+.trc-sim-val{font-size:9px;color:#B695FA;font-weight:600;min-width:24px;text-align:right}
+.trc-div{border:none;border-top:1px solid var(--border);margin:8px 0}
+
+/* ─── MODAL ─── */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;
+  align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:20px;width:400px;max-width:92vw}
+.m-ttl{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--t1)}
+.m-desc{font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5}
+.m-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 12px;font-size:13px;font-family:inherit;color:var(--t1);outline:none;margin-bottom:12px}
+.m-inp:focus{border-color:var(--border-hi)}
+.m-inp::placeholder{color:var(--t3)}
+.m-acts{display:flex;gap:8px;justify-content:flex-end}
+.m-btn{font-size:12px;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s;font-weight:500}
+.m-pri{background:var(--accent);border:none;color:var(--bg)}.m-pri:hover{filter:brightness(1.1)}
+.m-sec{background:transparent;border:1px solid var(--border);color:var(--t2)}.m-sec:hover{border-color:var(--border-hi)}
+.fi{display:none}
+@media(max-width:900px){.trace-panel{display:none}}
+@media(max-width:640px){.sidebar{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── LEFT SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="logo-bar">
+    <div class="logo-glyph">🌐</div>
+    <div><div class="logo-n">OmniArch</div><div class="logo-s">ChromaDB · Multi-Domain AI</div></div>
+  </div>
+  <div class="sb-scroll">
+    <div>
+      <div class="sec-lbl">Domain Agents</div>
+      <div id="agentList"></div>
+    </div>
+
+    <!-- ChromaDB Panel -->
+    <div>
+      <div class="sec-lbl">ChromaDB Vector Store</div>
+      <div class="chroma-box">
+        <div class="chroma-hdr">
+          <span class="chroma-logo">🔷</span>
+          <span class="chroma-ttl">In-Memory Collections</span>
+          <span class="chroma-stat" id="chromaStatus">0 vectors</span>
+        </div>
+        <div id="chromaCollections"><div class="chroma-empty">No collections yet</div></div>
+        <div class="chroma-stats-bar">
+          <div class="cs-item"><div class="cs-val" id="csVecs">0</div><div class="cs-lbl">Vectors</div></div>
+          <div class="cs-item"><div class="cs-val" id="csChunks">0</div><div class="cs-lbl">Chunks</div></div>
+          <div class="cs-item"><div class="cs-val" id="csColls">0</div><div class="cs-lbl">Collections</div></div>
+        </div>
+        <div class="sim-bar-wrap">
+          <div class="sim-bar-lbl"><span>Last query similarity</span><span id="simVal">—</span></div>
+          <div class="sim-bar-bg"><div class="sim-bar-fill" id="simBar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-lbl">Knowledge Sources</div>
+      <div id="kbList"></div>
+      <button class="add-src" onclick="openModal('wiki')">+ Add Wiki / URL</button>
+      <button class="add-src" onclick="openModal('video')">+ Add YouTube Video</button>
+      <button class="add-src" onclick="document.getElementById('fileUp').click()">+ Upload Document</button>
+    </div>
+    <div>
+      <div class="sec-lbl">Agent Tools</div>
+      <div class="chips">
+        <div class="chip on" id="chip-chroma" onclick="toggleChip('chroma')">🔷 ChromaDB RAG</div>
+        <div class="chip on" id="chip-web" onclick="toggleChip('web')">🔍 Web Search</div>
+        <div class="chip on" id="chip-rag" onclick="toggleChip('rag')">📚 Full KB</div>
+        <div class="chip" id="chip-code" onclick="toggleChip('code')">💻 Code Gen</div>
+        <div class="chip" id="chip-diagram" onclick="toggleChip('diagram')">📐 Diagrams</div>
+        <div class="chip" id="chip-cross" onclick="toggleChip('cross')">🔗 Cross-Domain</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <header class="chat-hdr">
+    <div>
+      <div class="chat-ttl">Multi-Domain Intelligence Hub</div>
+      <div class="chat-sub" id="chatSub">ChromaDB Vector RAG · Claude Sonnet · 7 agents active</div>
+    </div>
+    <div class="hdr-badges">
+      <span class="badge bg" id="statusBadge">● Ready</span>
+      <span class="badge bv" id="vecBadge">0 vectors</span>
+      <span class="badge bb" id="kbBadge">0 docs</span>
+      <button class="trc-btn" onclick="toggleTrace()" title="Agent Trace">⚙</button>
+    </div>
+  </header>
+
+  <div class="messages" id="messages">
+    <div class="empty-state" id="emptyState">
+      <div class="ei">🔷</div>
+      <div class="et">Vector-Powered Multi-Domain Intelligence</div>
+      <div class="es">ChromaDB TF-IDF vector store with cosine similarity retrieval. Add Wikipedia articles, documents, or videos — chunks are indexed and semantically retrieved per query.</div>
+      <div class="sugs" id="sugs"></div>
+    </div>
+  </div>
+
+  <div class="attach-bar" id="attachBar"></div>
+  <div class="input-area">
+    <div class="input-box">
+      <textarea id="userInput" rows="1" placeholder="Ask across domains — ChromaDB retrieves relevant context automatically…"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <div class="iacts">
+        <button class="iact" onclick="document.getElementById('imgUp').click()" title="Attach image">🖼️</button>
+        <button class="iact" onclick="openModal('wiki')" title="Add Wikipedia / URL">🌐</button>
+        <button class="iact" onclick="openModal('video')" title="Add YouTube video">🎥</button>
+        <button class="iact" onclick="document.getElementById('fileUp').click()" title="Upload document">📎</button>
+      </div>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg class="si" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11z"/></svg>
+      </button>
+    </div>
+    <div class="input-foot">
+      <button class="hint-btn" onclick="clearChat()">Clear chat</button>
+      <button class="hint-btn" onclick="clearVectorStore()">Clear ChromaDB</button>
+      <span class="tool-stat" id="toolStat"></span>
+    </div>
+  </div>
+</main>
+
+<!-- ── TRACE ── -->
+<aside class="trace-panel" id="tracePanel">
+  <div class="trc-hdr">
+    <div class="trc-ttl">⚙ Orchestration + ChromaDB</div>
+    <button class="trc-clr" onclick="clearTrace()">Clear</button>
+  </div>
+  <div class="trc-body" id="trcBody">
+    <div class="trc-empty" id="trcEmpty">
+      <span style="font-size:20px">🔷</span>
+      <span>Vector retrieval activity appears here</span>
+    </div>
+  </div>
+</aside>
+</div>
+
+<!-- Modal -->
+<div class="modal-ov" id="modalOv">
+  <div class="modal">
+    <div class="m-ttl" id="mTtl"></div>
+    <div class="m-desc" id="mDesc"></div>
+    <input class="m-inp" id="mInp" />
+    <div class="m-acts">
+      <button class="m-btn m-sec" onclick="closeModal()">Cancel</button>
+      <button class="m-btn m-pri" onclick="confirmModal()">Add + Index to ChromaDB</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" class="fi" id="fileUp" accept=".txt,.md,.pdf,.csv,.json" onchange="handleFile(event)">
+<input type="file" class="fi" id="imgUp" accept="image/*" onchange="handleImage(event)">
+
+<script>
+// ════════════════════════════════════════════════
+//  CHROMADB — IN-MEMORY VECTOR STORE
+//  TF-IDF vectors + cosine similarity
+// ════════════════════════════════════════════════
+class ChromaDB {
+  constructor(){ this.collections = new Map(); }
+
+  createCollection(name){
+    if(!this.collections.has(name))
+      this.collections.set(name, new ChromaCollection(name));
+    return this.collections.get(name);
+  }
+
+  getCollection(name){ return this.collections.get(name)||null; }
+  listCollections(){ return [...this.collections.keys()]; }
+
+  deleteCollection(name){ this.collections.delete(name); }
+
+  get totalVectors(){
+    let n=0;
+    for(const c of this.collections.values()) n+=c.count();
+    return n;
+  }
+}
+
+class ChromaCollection {
+  constructor(name){
+    this.name = name;
+    this.documents = [];  // {id, text, metadata, vector}
+    this.vocab = new Map(); // word -> index
+  }
+
+  // ── TF-IDF vectorisation ──
+  tokenize(text){
+    return text.toLowerCase()
+      .replace(/[^a-z0-9\s]/g,' ')
+      .split(/\s+/)
+      .filter(w=>w.length>2 && !STOP_WORDS.has(w));
+  }
+
+  buildVocab(tokens){ tokens.forEach(t=>{ if(!this.vocab.has(t)) this.vocab.set(t,this.vocab.size); }); }
+
+  tfidf(tokens){
+    const tf = new Map();
+    tokens.forEach(t=>tf.set(t,(tf.get(t)||0)+1));
+    const vec = new Float32Array(this.vocab.size);
+    tf.forEach((cnt,word)=>{
+      const idx = this.vocab.get(word);
+      if(idx===undefined) return;
+      const tfv = cnt/tokens.length;
+      const df = this.documents.filter(d=>d.tokens.includes(word)).length+1;
+      const idf = Math.log((this.documents.length+1)/df)+1;
+      vec[idx] = tfv*idf;
+    });
+    return vec;
+  }
+
+  cosine(a,b){
+    let dot=0,na=0,nb=0;
+    const len=Math.min(a.length,b.length);
+    for(let i=0;i<len;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i];}
+    const denom=Math.sqrt(na)*Math.sqrt(nb);
+    return denom>0?dot/denom:0;
+  }
+
+  add(ids, documents, metadatas=[]){
+    // rebuild vocab from all new docs first
+    documents.forEach(text=>{
+      const tokens = this.tokenize(text);
+      this.buildVocab(tokens);
+    });
+    // re-vectorise existing docs with updated vocab
+    this.documents.forEach(d=>{ d.vector = this.tfidf(d.tokens); });
+    // add new docs
+    documents.forEach((text,i)=>{
+      const tokens = this.tokenize(text);
+      this.documents.push({
+        id: ids[i], text, tokens,
+        metadata: metadatas[i]||{},
+        vector: this.tfidf(tokens)
+      });
+    });
+  }
+
+  query(queryText, nResults=5){
+    if(!this.documents.length) return {documents:[[]], metadatas:[[]], distances:[[]]};
+    const qTokens = this.tokenize(queryText);
+    this.buildVocab(qTokens);
+    // pad existing vectors to new vocab size
+    this.documents.forEach(d=>{
+      if(d.vector.length<this.vocab.size){
+        const nv=new Float32Array(this.vocab.size);
+        nv.set(d.vector);d.vector=nv;
+      }
+    });
+    const qvec = this.tfidf(qTokens);
+    const scored = this.documents.map(d=>({
+      ...d,
+      score: this.cosine(qvec, d.vector)
+    })).sort((a,b)=>b.score-a.score).slice(0,nResults);
+    return {
+      documents:[scored.map(d=>d.text)],
+      metadatas:[scored.map(d=>d.metadata)],
+      distances:[scored.map(d=>1-d.score)],
+      scores: scored.map(d=>d.score)
+    };
+  }
+
+  delete(id){ this.documents = this.documents.filter(d=>d.id!==id); }
+  count(){ return this.documents.length; }
+}
+
+const STOP_WORDS = new Set(['the','and','for','are','was','were','has','have','had','that','with','from','this','not','but','they','their','been','will','would','could','should','also','into','its','than','then','when','where','who','what','which','how','all','any','some','can','may','our','your','more','most','such','use','used','using','each','both','very','just','over','after','before','about','through','between','these','those','only','other','new','one','two','three','being','there','here','him','her','his','she','you','get','got','per','set','see','like','make','made','take','taken']);
+
+// ─── Singleton ───
+const chromaClient = new ChromaDB();
+
+// ════════════════════════════════════════════════
+//  DOMAIN DEFINITIONS
+// ════════════════════════════════════════════════
+const DOMAINS = [
+{id:'ea',name:'Enterprise Arch',emoji:'🏗️',color:'#A78BFA',tag:'TOGAF · Zachman · ArchiMate',
+knowledge:`Enterprise Architecture Frameworks: TOGAF 10 ADM phases Preliminary Vision Business IS Technology Opportunities Migration Implementation Change. Architecture Content Framework Enterprise Continuum Architecture Repository. Zachman Framework 6x6 matrix What How Where Who When Why versus Executive Business Architect Designer Builder Subcontractor. SABSA Business Architect Designer Builder Tradesman FM layers. FEAF DoDAF ArchiMate 3.1 notation. Cloud Architecture Hub-spoke network topology Landing zone design Cloud Operating Model. Integration Event-driven architecture API gateway Service mesh CQRS Saga Outbox patterns. EA Governance Architecture Review Boards ARBs Architecture Decision Records ADRs Standards repository Guardrails as code Business capability mapping Value stream mapping Technical debt management. Digital Transformation Platform thinking Composable architecture MACH API-first strategy Modernization patterns strangler fig bubble context branch by abstraction Domain-Driven Design DDD bounded contexts.`},
+
+{id:'bfsi',name:'BFSI',emoji:'🏦',color:'#F59E0B',tag:'Banking · FinServ · Insurance',
+knowledge:`Regulatory Basel III IV capital adequacy LCR NSFR SA-CCR FRTB. PCI-DSS v4.0 12 requirements SAQ types P2PE tokenization. AML KYC FATF 40 recommendations FinCEN sanctions screening adverse media. IFRS 9 ECL models 3-stage staging. SOX ITGC ICFR. MiFID II MiFIR best execution transaction reporting. DORA ICT risk incident reporting resilience testing. Open Banking PSD2 UK Open Banking FDX standard. Core Banking Architecture monolith microservices strangler fig. Core Banking modernization Temenos Transact Finacle FIS Modern Banking Mambu cloud-native. Real-time payments ISO 20022 migration FedNow RTP SEPA Instant SWIFT gpi. API-first banking platforms Event sourcing for ledger. Digital Banking Payments Neobank architecture cloud-native event-driven. Embedded finance BaaS Railsbank Marqeta Synapse. BNPL architecture Crypto tokenized asset custody. Card processing EMV 3DS Mastercard Visa network connectivity. Risk Architecture Real-time fraud detection ML feature stores graph analytics AML behavioral biometrics. Credit scoring alternative data rent telecom open banking. Model Risk Management SR 11-7. Stress testing CCAR EBA. Market risk systems VaR Expected Shortfall. Insurance Solvency II SCR MCR ORSA. Guidewire PolicyCenter BillingCenter ClaimCenter Duck Creek. P&C Life architecture Telematics UBI InsurTech integration patterns.`},
+
+{id:'healthcare',name:'Healthcare',emoji:'🏥',color:'#10B981',tag:'HL7 · FHIR · HIPAA',
+knowledge:`Standards Interoperability HL7 FHIR R4 R5 resources RESTful API bulk data export CDS Hooks SMART on FHIR OAuth2 flows. ICD-10-CM PCS diagnosis procedure coding. SNOMED CT clinical terminology. LOINC lab observations. DICOM medical imaging PACS VNA. X12 EDI 837P 837I 835 270 271 claims remittance eligibility. NCPDP SCRIPT prescriptions. USCDI v3 minimum data set. Regulatory HIPAA Privacy Rule Security Rule addressable required safeguards Breach Notification. HITECH Act FDA 21 CFR Part 11 electronic records clinical trials. ONC 21st Century Cures Act information blocking certified HIT. CMS Interoperability Prior Authorization Rule FHIR APIs required 2026. EU MDR SaMD classification. SOC 2 Type II healthcare SaaS. Clinical Architecture EHR integration Epic App Orchard Interconnect APIs Oracle Health Cerner FHIR athenahealth Meditech Expanse. Clinical Decision Support CDS Hooks alerts drug-drug allergy interaction engines. Revenue Cycle Management claims scrubbing prior auth automation denial management charge capture. Population Health Management platforms. Care Management care coordination. Healthcare Data clinical data warehouses Snowflake Healthcare Databricks. De-identification Safe Harbor Expert Determination. Real-World Evidence RWE platforms. OMOP CDM research networks. FHIR-based data lakes Azure Health Data Services AWS HealthLake. Emerging Ambient AI documentation Nuance DAX Copilot Abridge Suki. Clinical NLP autonomous coding. Federated learning privacy-preserving health AI. Remote Patient Monitoring RPM IoT. Digital therapeutics FDA SaMD pathway. Generative AI radiology report generation.`},
+
+{id:'pharma',name:'Pharmacy',emoji:'💊',color:'#818CF8',tag:'PBM · e-Rx · Drug Safety',
+knowledge:`Standards NCPDP SCRIPT 10.6 2017071 NewRx RxChangeRequest CancelRx Refill. NDC format 5-4-2 labeler product package. RxNorm normalized drug names clinical drug concept. NPI prescriber pharmacy IDs. FHIR MedicationRequest MedicationDispense MedicationKnowledge. DSCSA serialization GS1-128 2D barcodes EPCIS track-and-trace events. NABP e-Profile. Regulatory FDA drug approval NDA ANDA 505j BLA 505b2 Breakthrough Therapy REMS. DEA controlled substance scheduling Schedules I-V PDMP integration 21 CFR Part 1306. 340B Drug Pricing Program covered entities contract pharmacies TPA oversight EHR split-billing. REMS programs iPledge isotretinoin TIRF REMS. USP 795 797 800 compounding standards. HIPAA pharmacy. Architecture Pharmacy Benefit Management PBM adjudication engines formulary management rebate processing Express Scripts CVS Caremark OptumRx. e-Prescribing workflow EHR Surescripts SureScripts NCPDP SCRIPT. Drug Utilization Review DUR prospective retrospective concurrent DDI DDA therapeutic duplication. Prior Authorization automation CoverMyMeds Surescripts PA. Specialty pharmacy hub services copay assistance patient support programs. Operations Automated dispensing cabinets Omnicell XT BD Pyxis MedStation HL7 diversion detection. Cold chain biologics vaccines GDP guidelines USP 1079 excursion management Controlant Sensitech IoT loggers. Drug interaction checking First Databank FDB Micromedex Wolters Kluwer Medi-Span. Inventory ABC VEN FEFO min max par levels. 503B outsourcing facilities. Emerging Gene therapy cell therapy supply chain vein-to-vein cryogenic logistics. Pharmacovigilance FDA MedWatch EudraVigilance Oracle Argus IQVIA ARISg ICSR processing signal detection. HEOR data architecture. AI drug interaction prediction.`},
+
+{id:'retail',name:'Retail',emoji:'🛍️',color:'#F43F5E',tag:'Omnichannel · Commerce · Supply Chain',
+knowledge:`Commerce Architecture Unified Commerce POS e-commerce mobile endless aisle. Headless Commerce MACH Microservices API-first Cloud-native Headless commercetools VTEX Elastic Path Salesforce B2C Commerce. Composable commerce best-of-breed orchestration layer. Order Management Systems OMS Salesforce Manhattan Active Omni IBM Sterling ATP split shipment ship-from-store BOPIS BORIS. Standards GS1 EAN UPC EDI 850 PO 810 Invoice 856 ASN GS1-128 EPCIS item-level track-and-trace. PCI-DSS payment security PA-DSS P2PE tokenization. CCPA GDPR customer data rights consent management. WCAG 2.1 accessibility e-commerce. Digital Commerce platforms Salesforce SFRA Adobe Commerce Magento Shopify Plus BigCommerce. Product Information Management PIM Akeneo Salsify Contentserv. Customer Data Platforms CDP Salesforce Data Cloud Segment Twilio mParticle. Personalization Dynamic Yield Algolia Recommend AI-powered search ranking. Supply Chain demand forecasting statistical ML external signals weather events. Supplier collaboration portals EDI API hybrid portal onboarding. Last-mile delivery optimization FarEye Bringg carrier orchestration. Returns management reverse logistics Happy Returns Optoro restock automation. Inventory optimization safety stock models multi-echelon network design MEIO. Loyalty CRM loyalty platform architecture points tiers cashback coalition programs Antavo. Customer segmentation RFM analysis ML CLV prediction. Omnichannel contact center AI agent assist conversational commerce self-service portals. Emerging Frictionless checkout CV weight sensors RFID Amazon Just Walk Out. AR try-on Snap Lens Meta Spark Vertebrae. Social commerce TikTok Shop Instagram Checkout. Sustainability Scope 3 carbon labels circular economy take-back programs.`},
+
+{id:'mfg',name:'Manufacturing',emoji:'🏭',color:'#F97316',tag:'Industry 4.0 · IIoT · Digital Twin',
+knowledge:`Industry 4.0 Framework Cyber-Physical Systems CPS Industrial IoT IIoT Smart Factory Digital Thread Digital Twin Additive Manufacturing Collaborative Robotics cobots Universal Robots FANUC KUKA. Autonomous Mobile Robots AMR Fetch Locus Robotics 6 River Systems. Standards ISA-95 IEC 62264 ERP-MES integration B2MML XML activity models equipment hierarchy. ISA-99 IEC 62443 OT ICS cybersecurity CSMS Security Levels zone conduit model. OPC-UA information model pub-sub companion specs robotics CNC. MQTT IoT messaging SPARKPLUG B industrial. MTConnect machine tool data Adapters Agents. ISA-88 batch control recipe management. ISO 50001 energy management systems. IATF 16949 automotive quality management. Architecture OT IT Convergence Purdue ISA-95 5-level pyramid flat ICS architecture DMZ data diodes Claroty Dragos Nozomi OT security. Manufacturing Execution Systems MES SAP Manufacturing Execution Siemens Opcenter Rockwell FactoryTalk GE Digital Proficy Plant. ERP integration SAP S4HANA PP QM PM Oracle Fusion Manufacturing Cloud. Predictive Maintenance PdM vibration FFT thermography oil analysis edge ML CMMS integration IBM Maximo SAP PM. Quality Management Systems ETQ Reliance MasterControl Arena QMS. Digital Twin Azure Digital Twins DTDL ontologies AWS IoT TwinMaker Siemens Xcelerator MindSphere PTC ThingWorx Vuforia Bentley iTwin NVIDIA Omniverse. Edge AI real-time QC NVIDIA Jetson Orin Intel OpenVINO Hailo-8. Computer vision defect detection Keyence Cognex Zebra Aurora Vision. 5G private networks smart factory sub-6 GHz URLLC. TSN IEEE 802.1 deterministic Ethernet. PROFINET EtherNet IP OPC-UA protocol bridging. Sustainability Scope 1 2 3 emissions GHG Protocol LCA ISO 14001 EMS Siemens EnergyIP Schneider EcoStruxure. Circular economy reverse logistics remanufacturing take-back. ESG data integration CSRD IFRS S2 reporting.`},
+
+{id:'cloud',name:'IT Cloud',emoji:'☁️',color:'#38BDF8',tag:'DevSecOps · Platform Eng · FinOps',
+knowledge:`Cloud Platforms AWS Well-Architected Framework 6 pillars Landing Zone Accelerator Control Tower AWS Organizations SCPs Security Hub. Azure Cloud Adoption Framework CAF Strategy Plan Ready Adopt Govern Manage ALZ Bicep Terraform Azure Policy Microsoft Defender for Cloud. GCP Cloud Architecture Framework Google Cloud Landing Zone Security Command Center SLSA supply chain. Multi-cloud Anthos Azure Arc hybrid Crossplane IaC Terragrunt DRY modules. Platform Engineering Internal Developer Platforms IDP Backstage developer portal TechDocs Port Cortex. Golden Paths paved roads guardrails. Platform as Product PaaP SLOs. Developer self-service Terraform module catalog Helm chart repos GitOps-enabled. Cognitive load reduction Team Topologies stream-aligned platform enabling complicated-subsystem. DevSecOps CI CD pipelines GitHub Actions GitLab CI Azure DevOps YAML templates. GitOps ArgoCD ApplicationSets Flux CD GOTK progressive delivery Argo Rollouts Flagger canary. Policy as Code OPA Rego policies Kyverno Kubernetes admission Conftest. SAST DAST SCA Semgrep Checkmarx Snyk OWASP ZAP. Software Supply Chain Security SLSA 1-4 levels SBOM Syft Grype Sigstore cosign image signing in-toto attestations. SRE SLOs SLIs SLAs error budget policy multi-window burn rate alerts Alertmanager. Toil reduction Ansible runbooks Crossplane self-healing. Chaos engineering Gremlin LitmusChaos AWS FIS. Observability OpenTelemetry Grafana Loki Tempo Mimir Datadog APM Dynatrace Davis AI. Incident management PagerDuty AIOps Opsgenie postmortem blameless culture Jeli. FinOps Cost allocation mandatory tag taxonomy. Commitment management EC2 RIs Azure Reserved VMs GCP CUDs Savings Plans. Rightsizing AWS Compute Optimizer Azure Advisor CAST AI. Spot orchestration Karpenter node provisioning Spot interruption handling. FinOps tooling CloudHealth Apptio Cloudability Infracost. Security Zero Trust BeyondCorp identity-centric device posture continuous verification. CSPM Prisma Cloud Wiz cloud graph Defender for Cloud posture. CWPP Falco eBPF runtime Aqua Security Sysdig Secure. SIEM SOAR Microsoft Sentinel KQL Chronicle YARA-L Splunk SIEM SOAR playbooks. Secrets management HashiCorp Vault dynamic secrets AWS Secrets Manager Azure Key Vault. Emerging AI ML platforms SageMaker Vertex AI Azure ML MLOps feature stores model registries. LLMOps LangSmith Weights Biases Weave Arize Phoenix prompt versioning evals cost tracking. Green computing Carbon Aware SDK low-carbon regions GreenSoftware Foundation. Confidential computing Intel TDX AMD SEV-SNP AWS Nitro Enclaves. Platform WASM WASI edge serverless.`}
+];
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let activeDomains = new Set(DOMAINS.map(d=>d.id));
+let chips = {chroma:true,web:true,rag:true,code:false,diagram:false,cross:false};
+let messages = [];
+let streaming = false;
+let traceOpen = true;
+let kbSources = [];
+let pending = [];
+let modalMode = 'wiki';
+let lastSimScore = 0;
+
+// Index domain knowledge into ChromaDB on startup
+function indexDomainKnowledge(){
+  DOMAINS.forEach(d=>{
+    const coll = chromaClient.createCollection(`domain_${d.id}`);
+    const chunks = chunkText(d.knowledge, 400, 80);
+    coll.add(
+      chunks.map((_,i)=>`${d.id}_domain_${i}`),
+      chunks,
+      chunks.map((_,i)=>({source:'domain', domain:d.id, chunk:i}))
+    );
+  });
+  updateChromaUI();
+  addTrace('🔷','ChromaDB Init',`Indexed ${chromaClient.totalVectors} domain knowledge vectors across ${DOMAINS.length} collections`,'chroma');
+}
+
+// ════════════════════════════════════════════════
+//  TEXT CHUNKING
+// ════════════════════════════════════════════════
+function chunkText(text, size=500, overlap=100){
+  const words = text.split(/\s+/);
+  const chunks=[];
+  for(let i=0;i<words.length;i+=size-overlap){
+    const chunk = words.slice(i,i+size).join(' ');
+    if(chunk.trim().length>30) chunks.push(chunk);
+    if(i+size>=words.length) break;
+  }
+  return chunks.length?chunks:[text.slice(0,500)];
+}
+
+// ════════════════════════════════════════════════
+//  CHROMADB QUERY — retrieves relevant chunks
+// ════════════════════════════════════════════════
+function queryChromaDB(queryText, topK=6){
+  if(!chips.chroma) return {chunks:[],sources:[]};
+  const activeDomainIds = [...activeDomains];
+  const results = [];
+
+  // Query active domain collections
+  activeDomainIds.forEach(domId=>{
+    const coll = chromaClient.getCollection(`domain_${domId}`);
+    if(!coll||!coll.count()) return;
+    const r = coll.query(queryText, 2);
+    r.documents[0].forEach((doc,i)=>{
+      if(r.scores[i]>0.05)
+        results.push({text:doc, score:r.scores[i], source:`Domain:${domId}`, meta:r.metadatas[0][i]});
+    });
+  });
+
+  // Query user-added collections
+  chromaClient.listCollections()
+    .filter(n=>!n.startsWith('domain_'))
+    .forEach(name=>{
+      const coll = chromaClient.getCollection(name);
+      if(!coll||!coll.count()) return;
+      const r = coll.query(queryText, 3);
+      r.documents[0].forEach((doc,i)=>{
+        if(r.scores[i]>0.08)
+          results.push({text:doc, score:r.scores[i], source:`KB:${name}`, meta:r.metadatas[0][i]});
+      });
+    });
+
+  results.sort((a,b)=>b.score-a.score);
+  const top = results.slice(0,topK);
+
+  lastSimScore = top.length ? top[0].score : 0;
+  updateSimBar(lastSimScore);
+
+  return {
+    chunks: top,
+    sources: [...new Set(top.map(r=>r.source))]
+  };
+}
+
+function updateSimBar(score){
+  const pct = Math.round(Math.min(score*2*100, 100));
+  document.getElementById('simBar').style.width = pct+'%';
+  document.getElementById('simVal').textContent = score>0 ? score.toFixed(3) : '—';
+}
+
+// ════════════════════════════════════════════════
+//  CHROMADB UI
+// ════════════════════════════════════════════════
+function updateChromaUI(){
+  const total = chromaClient.totalVectors;
+  const colls = chromaClient.listCollections();
+  document.getElementById('chromaStatus').textContent = total+' vectors';
+  document.getElementById('vecBadge').textContent = total+' vectors';
+  document.getElementById('csVecs').textContent = total;
+  document.getElementById('csColls').textContent = colls.length;
+  document.getElementById('csChunks').textContent = total;
+
+  const userColls = colls.filter(n=>!n.startsWith('domain_'));
+  const el = document.getElementById('chromaCollections');
+  if(!userColls.length){
+    el.innerHTML = '<div class="chroma-empty">Add docs to create user collections</div>';
+    return;
+  }
+  el.innerHTML = userColls.map(name=>{
+    const coll = chromaClient.getCollection(name);
+    return `<div class="coll-row">
+      <span class="coll-icon">📂</span>
+      <span class="coll-name" title="${name}">${name}</span>
+      <span class="coll-cnt">${coll.count()} vecs</span>
+      <button class="coll-rm" onclick="deleteCollection('${name}')">×</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteCollection(name){
+  chromaClient.deleteCollection(name);
+  kbSources = kbSources.filter(s=>s.collName!==name);
+  renderKb(); updateChromaUI();
+  addTrace('🗑️','Collection Deleted',`"${name}" removed from ChromaDB`,'chroma');
+}
+
+function clearVectorStore(){
+  const userColls = chromaClient.listCollections().filter(n=>!n.startsWith('domain_'));
+  userColls.forEach(n=>chromaClient.deleteCollection(n));
+  kbSources=[];
+  renderKb(); updateChromaUI();
+  addTrace('🗑️','User Collections Cleared','Domain knowledge indexes retained','chroma');
+}
+
+// ════════════════════════════════════════════════
+//  AGENTS & KB
+// ════════════════════════════════════════════════
+function renderAgents(){
+  document.getElementById('agentList').innerHTML = DOMAINS.map(d=>`
+    <div class="agent-card ${activeDomains.has(d.id)?'on':''}" onclick="toggleDomain('${d.id}')">
+      <div class="ag-dot" style="background:${d.color}"></div>
+      <div class="ag-em">${d.emoji}</div>
+      <div class="ag-info">
+        <div class="ag-name">${d.name}</div>
+        <div class="ag-tag">${d.tag}</div>
+      </div>
+      <div class="ag-tgl"></div>
+    </div>`).join('');
+  const n=activeDomains.size;
+  document.getElementById('chatSub').textContent = `ChromaDB Vector RAG · Claude Sonnet · ${n} agent${n!==1?'s':''} active`;
+}
+
+function toggleDomain(id){
+  if(activeDomains.has(id)){if(activeDomains.size>1) activeDomains.delete(id);}
+  else activeDomains.add(id);
+  renderAgents();
+}
+
+function renderKb(){
+  const el=document.getElementById('kbList');
+  if(!kbSources.length){
+    el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:3px 6px">No sources added yet</div>';
+  } else {
+    el.innerHTML=kbSources.map((s,i)=>`
+      <div class="kb-item">
+        <div class="kb-dot" style="background:${s.color||'var(--accent)'}"></div>
+        <div class="kb-lbl" title="${s.label}">${s.label}</div>
+        <div class="kb-type">${s.type}</div>
+        <button class="kb-rm" onclick="removeKb(${i})">×</button>
+      </div>`).join('');
+  }
+  document.getElementById('kbBadge').textContent = kbSources.length+' docs';
+}
+
+function removeKb(i){
+  const s=kbSources[i];
+  if(s.collName) chromaClient.deleteCollection(s.collName);
+  kbSources.splice(i,1);
+  renderKb(); updateChromaUI();
+}
+
+// ════════════════════════════════════════════════
+//  INDEX INTO CHROMADB
+// ════════════════════════════════════════════════
+function indexToChromaDB(collectionName, content, metadata={}){
+  const coll = chromaClient.createCollection(collectionName);
+  const chunks = chunkText(content, 400, 80);
+  coll.add(
+    chunks.map((_,i)=>`${collectionName}_chunk_${i}`),
+    chunks,
+    chunks.map((_,i)=>({...metadata, chunk:i}))
+  );
+  updateChromaUI();
+  addTrace('🔷','ChromaDB Index',`"${collectionName}" → ${chunks.length} chunks vectorised & stored`,'chroma');
+  return chunks.length;
+}
+
+// ════════════════════════════════════════════════
+//  CHIPS
+// ════════════════════════════════════════════════
+function toggleChip(id){
+  chips[id]=!chips[id];
+  document.getElementById('chip-'+id).classList.toggle('on',chips[id]);
+  updateToolStat();
+}
+function updateToolStat(){
+  const map={chroma:'ChromaDB',web:'Web',rag:'Full KB',code:'Code',diagram:'Diagrams',cross:'Cross-Domain'};
+  const active=Object.entries(chips).filter(([k,v])=>v).map(([k])=>map[k]);
+  document.getElementById('toolStat').textContent=active.length?active.join(' · ')+' active':'No tools';
+}
+
+// ════════════════════════════════════════════════
+//  MODAL
+// ════════════════════════════════════════════════
+function openModal(mode){
+  modalMode=mode;
+  const [ttl,desc,ph]=mode==='wiki'
+    ?['Add Wikipedia / URL','Enter a Wikipedia article title or full URL. Content will be fetched, chunked, and indexed into ChromaDB.','"Basel III" or https://en.wikipedia.org/wiki/...']
+    :['Add YouTube Video','Enter a YouTube URL. Metadata will be indexed as a ChromaDB collection.','https://www.youtube.com/watch?v=...'];
+  document.getElementById('mTtl').textContent=ttl;
+  document.getElementById('mDesc').textContent=desc;
+  document.getElementById('mInp').placeholder=ph;
+  document.getElementById('mInp').value='';
+  document.getElementById('modalOv').classList.add('open');
+  setTimeout(()=>document.getElementById('mInp').focus(),200);
+}
+function closeModal(){document.getElementById('modalOv').classList.remove('open');}
+async function confirmModal(){ const v=document.getElementById('mInp').value.trim(); if(!v) return; closeModal(); modalMode==='wiki'?await fetchWiki(v):await fetchVideo(v); }
+document.getElementById('modalOv').addEventListener('click',e=>{if(e.target===e.currentTarget) closeModal();});
+document.getElementById('mInp').addEventListener('keydown',e=>{if(e.key==='Enter') confirmModal();if(e.key==='Escape') closeModal();});
+
+// ════════════════════════════════════════════════
+//  WIKI FETCH
+// ════════════════════════════════════════════════
+async function fetchWiki(input){
+  let title=input;
+  if(input.startsWith('http')){
+    const m=input.match(/\/wiki\/([^?#]+)/);
+    if(m) title=decodeURIComponent(m[1].replace(/_/g,' '));
+    else{
+      const collName='url_'+Date.now();
+      indexToChromaDB(collName,`URL Reference: ${input}`,{source:'url',url:input});
+      kbSources.push({label:input.slice(0,40),type:'URL',collName,color:'var(--accent)'});
+      renderKb();return;
+    }
+  }
+  addTrace('🔍','Fetching Wiki',`Retrieving: "${title}"`);
+  try{
+    const url=`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=extracts&exintro=false&format=json&origin=*&redirects=1`;
+    const d=await(await fetch(url)).json();
+    const page=Object.values(d.query?.pages||{})[0];
+    if(page?.extract){
+      const content=page.extract.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,15000);
+      const lbl=page.title||title;
+      const collName='wiki_'+lbl.replace(/\W+/g,'_').toLowerCase().slice(0,30)+'_'+Date.now();
+      const cnt=indexToChromaDB(collName,content,{source:'wikipedia',title:lbl});
+      kbSources.push({label:lbl,type:'WIKI',collName,content,color:'#A78BFA'});
+      pending.push({type:'wiki',label:`📖 ${lbl}`,content:content.slice(0,2000)});
+      renderKb();renderPending();
+      addTrace('✅','Wiki Indexed',`"${lbl}" → ${cnt} chunks in ChromaDB`);
+    }else{addTrace('⚠️','Not Found',`"${title}" not found`);}
+  }catch(e){addTrace('❌','Fetch Error',e.message);}
+}
+
+// ════════════════════════════════════════════════
+//  VIDEO FETCH
+// ════════════════════════════════════════════════
+async function fetchVideo(url){
+  addTrace('🎥','Fetching Video',`Retrieving metadata…`);
+  try{
+    const r=await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+    if(!r.ok) throw new Error('oEmbed unavailable');
+    const data=await r.json();
+    const content=`YouTube Video Title: ${data.title}\nChannel: ${data.author_name}\nURL: ${url}\nThis video discusses concepts, techniques, and patterns related to its title and channel topic. Use as a reference for the subject matter described.`;
+    const collName='video_'+Date.now();
+    indexToChromaDB(collName,content,{source:'youtube',title:data.title,author:data.author_name});
+    kbSources.push({label:data.title.slice(0,30),type:'VIDEO',collName,color:'#F43F5E'});
+    pending.push({type:'video',label:`📹 ${data.title.slice(0,25)}`,content});
+    renderKb();renderPending();
+    addTrace('✅','Video Indexed',`"${data.title}" → ChromaDB collection created`);
+  }catch(e){
+    const content=`YouTube Video URL: ${url}\nNote: Video reference for context.`;
+    const collName='video_'+Date.now();
+    indexToChromaDB(collName,content,{source:'youtube',url});
+    kbSources.push({label:url.slice(-25),type:'VIDEO',collName,color:'#F43F5E'});
+    pending.push({type:'video',label:'📹 Video',content});
+    renderKb();renderPending();
+    addTrace('⚠️','Video Indexed','URL stored (metadata unavailable)');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  FILE / IMAGE
+// ════════════════════════════════════════════════
+function handleFile(e){
+  const f=e.target.files[0];if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const content=ev.target.result.slice(0,15000);
+    const collName='doc_'+f.name.replace(/\W+/g,'_').toLowerCase().slice(0,20)+'_'+Date.now();
+    const cnt=indexToChromaDB(collName,content,{source:'upload',filename:f.name});
+    kbSources.push({label:f.name,type:'DOC',collName,content,color:'var(--bfsi)'});
+    pending.push({type:'file',label:`📎 ${f.name}`,content:content.slice(0,3000)});
+    renderKb();renderPending();
+    addTrace('📎','Doc Indexed',`"${f.name}" → ${cnt} chunks indexed`);
+  };
+  r.readAsText(f);e.target.value='';
+}
+
+function handleImage(e){
+  const f=e.target.files[0];if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const b64=ev.target.result.split(',')[1];
+    pending.push({type:'image',label:`🖼️ ${f.name}`,base64:b64,mediaType:f.type,preview:ev.target.result});
+    renderPending();
+    addTrace('🖼️','Image Ready',`Vision enabled: "${f.name}"`);
+  };
+  r.readAsDataURL(f);e.target.value='';
+}
+
+// ════════════════════════════════════════════════
+//  PENDING ATTACHMENTS
+// ════════════════════════════════════════════════
+function renderPending(){
+  const bar=document.getElementById('attachBar');
+  if(!pending.length){bar.innerHTML='';return;}
+  bar.innerHTML=pending.map((a,i)=>`
+    <div class="a-pill">
+      ${a.type==='image'?`<img src="${a.preview}" class="a-pill-img">`:''}
+      <span>${a.label}</span>
+      <button class="a-rm" onclick="removePending(${i})">×</button>
+    </div>`).join('');
+}
+function removePending(i){pending.splice(i,1);renderPending();}
+
+// ════════════════════════════════════════════════
+//  TRACE
+// ════════════════════════════════════════════════
+function addTrace(icon, label, detail, type){
+  const empty=document.getElementById('trcEmpty');
+  if(empty) empty.style.display='none';
+  const body=document.getElementById('trcBody');
+  const d=document.createElement('div');
+  d.className='trc-step';
+  const isChroma=type==='chroma';
+  d.innerHTML=`
+    <div class="trc-ico ${isChroma?'chroma':''}">${icon}</div>
+    <div style="flex:1;min-width:0">
+      <div class="trc-lbl">${label}${isChroma?`<span style="font-size:9px;margin-left:5px;padding:1px 5px;border-radius:3px;background:rgba(124,58,237,.2);color:#B695FA;border:1px solid rgba(124,58,237,.3);font-weight:700">CHROMA</span>`:''}</div>
+      <div class="trc-det">${detail}</div>
+    </div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+
+function addSimTrace(chunks){
+  if(!chunks.length) return;
+  const body=document.getElementById('trcBody');
+  const d=document.createElement('div');
+  d.className='trc-step';
+  const lines=chunks.slice(0,4).map(c=>{
+    const pct=Math.round(Math.min(c.score*2*100,100));
+    return `<div class="trc-sim" style="margin-top:3px">
+      <span style="font-size:9px;color:var(--t3);width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.source}</span>
+      <div class="trc-sim-bar"><div class="trc-sim-fill" style="width:${pct}%"></div></div>
+      <span class="trc-sim-val">${c.score.toFixed(3)}</span>
+    </div>`;
+  }).join('');
+  d.innerHTML=`
+    <div class="trc-ico chroma">🔷</div>
+    <div style="flex:1;min-width:0">
+      <div class="trc-lbl">Vector Retrieval <span style="font-size:9px;margin-left:5px;padding:1px 5px;border-radius:3px;background:rgba(124,58,237,.2);color:#B695FA;border:1px solid rgba(124,58,237,.3);font-weight:700">CHROMA</span></div>
+      <div class="trc-det">Top-${chunks.length} chunks by cosine similarity</div>
+      ${lines}
+    </div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+
+function clearTrace(){
+  document.getElementById('trcBody').innerHTML=`<div class="trc-empty" id="trcEmpty"><span style="font-size:20px">🔷</span><span>Vector retrieval activity appears here</span></div>`;
+}
+function toggleTrace(){
+  traceOpen=!traceOpen;
+  document.getElementById('tracePanel').classList.toggle('collapsed',!traceOpen);
+}
+
+// ════════════════════════════════════════════════
+//  SYSTEM PROMPT
+// ════════════════════════════════════════════════
+function buildSystemPrompt(retrievedChunks=[]){
+  const active=DOMAINS.filter(d=>activeDomains.has(d.id));
+  const agentList=active.map(d=>`• ${d.name} Agent (${d.emoji}): ${d.tag}`).join('\n');
+  const kbCtx=chips.rag&&kbSources.length
+    ?'\n\n=== FULL KNOWLEDGE BASE (FALLBACK) ===\n'+kbSources.map(s=>s.content||'').filter(Boolean).join('\n---\n')
+    :'';
+  const ragCtx=retrievedChunks.length
+    ?`\n\n=== CHROMADB RETRIEVED CONTEXT (${retrievedChunks.length} chunks, ranked by cosine similarity) ===\n`
+      +retrievedChunks.map((c,i)=>`[Rank ${i+1} | score=${c.score.toFixed(3)} | ${c.source}]\n${c.text}`).join('\n---\n')
+    :'';
+  return `You are OMNIARCH — an elite Multi-Domain Enterprise Architecture Orchestrator. You coordinate specialised AI agents and use ChromaDB vector retrieval to ground every answer in semantically-relevant knowledge chunks.
+
+ACTIVE DOMAIN AGENTS:
+${agentList}
+
+ORCHESTRATION: Route queries to the most relevant agents. For cross-domain queries, activate multiple agents simultaneously.${chips.cross?' CROSS-DOMAIN SYNTHESIS MODE: Map integration touchpoints, shared standards, and dependencies across all domains.':''}
+Use [DOMAIN NAME] prefixes to attribute each section (e.g. [BFSI], [HEALTHCARE], [IT CLOUD]).
+${chips.code?'Include code examples (Terraform, Python, YAML, FHIR JSON, ArchiMate) where valuable.':''}
+${chips.diagram?'Include ASCII architecture diagrams to illustrate patterns and data flows.':''}
+${ragCtx}${kbCtx}
+Prioritise the ChromaDB-retrieved chunks above for grounding. Be precise, enterprise-grade, and actionable.`;
+}
+
+// ════════════════════════════════════════════════
+//  CHAT CORE
+// ════════════════════════════════════════════════
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function removeEmpty(){const e=document.getElementById('emptyState');if(e) e.remove();}
+
+function fmt(text){
+  return text
+    .replace(/```(\w*)\n?([\s\S]*?)```/g,(_,l,c)=>`<pre>${c.trim()}</pre>`)
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^### (.+)$/gm,'<div style="font-weight:600;font-size:11px;color:var(--t2);margin:10px 0 3px;text-transform:uppercase;letter-spacing:.05em">$1</div>')
+    .replace(/^## (.+)$/gm,'<div style="font-weight:600;font-size:13px;margin:11px 0 4px">$1</div>')
+    .replace(/^\[([A-Z][A-Z\s/]+)\]/gm,(_,tag)=>{
+      const map={'BFSI':'#F59E0B','HEALTHCARE':'#10B981','PHARMACY':'#818CF8','RETAIL':'#F43F5E','MANUFACTURING':'#F97316','IT CLOUD':'#38BDF8','ENTERPRISE ARCH':'#A78BFA'};
+      const key=Object.keys(map).find(k=>tag.includes(k));
+      const c=key?map[key]:'var(--accent)';
+      return `<span class="dag-hdr" style="background:${c}20;color:${c};border:1px solid ${c}40">[${tag}]</span>`;
+    })
+    .replace(/^- (.+)$/gm,'<div style="padding:2px 0 2px 13px;border-left:2px solid var(--border);margin:2px 0">$1</div>')
+    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
+
+function appendMsg(role, content, sources, imgPrev, ragChunks){
+  removeEmpty();
+  const el=document.getElementById('messages');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  const ragHtml=ragChunks&&ragChunks.length
+    ?`<div class="rag-strip">
+        <span class="rag-ico">🔷</span>
+        <span class="rag-lbl">ChromaDB retrieved ${ragChunks.length} chunks</span>
+        ${ragChunks.slice(0,4).map(c=>`<span class="rag-chunk" title="${c.source}">${c.source.split(':')[1]||c.source} · ${c.score.toFixed(2)}</span>`).join('')}
+      </div>`:'' ;
+  const srcHtml=sources&&sources.length
+    ?`<div class="srcs">${sources.map(s=>{const d=DOMAINS.find(x=>x.name===s);const c=d?d.color:'var(--accent)';return `<span class="src-tag" style="color:${c};border-color:${c}40;background:${c}12">${s}</span>`;}).join('')}</div>`:'' ;
+  div.innerHTML=`
+    <div class="avatar ${role==='user'?'av-u':'av-a'}">${role==='user'?'U':'◎'}</div>
+    <div class="bubble ${role==='user'?'bbl-u':'bbl-a'}">
+      ${imgPrev?`<img src="${imgPrev}" class="img-prev">`:''}
+      ${role==='assistant'&&ragHtml?ragHtml:''}
+      ${fmt(content)}
+      ${role==='assistant'?srcHtml:''}
+    </div>`;
+  el.appendChild(div);el.scrollTop=el.scrollHeight;
+}
+
+function showThinking(lbl){
+  removeEmpty();
+  const el=document.getElementById('messages');
+  const div=document.createElement('div');
+  div.id='thinking';div.className='msg assistant';
+  div.innerHTML=`<div class="avatar av-a">◎</div>
+    <div class="bubble bbl-a"><div class="thinking-bar">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <span id="tLabel">${lbl||'Orchestrating agents…'}</span>
+    </div></div>`;
+  el.appendChild(div);el.scrollTop=el.scrollHeight;
+}
+function removeThinking(){const t=document.getElementById('thinking');if(t) t.remove();}
+function setStatus(lbl,type){
+  const b=document.getElementById('statusBadge');
+  b.textContent='● '+lbl;
+  b.className='badge '+(type==='thinking'?'ba':type==='vector'?'bv':type==='searching'?'bb':'bg');
+}
+
+
+async function sendMessage(){
+  if(streaming) return;
+  const inp=document.getElementById('userInput');
+  const text=inp.value.trim();
+  const imgs = pending.filter(a => a.type === 'image'); // Note: Standard Groq models handle text; use Llama-3.2-Vision if needed
+  
+  if(!text && !imgs.length) return;
+
+  inp.value=''; inp.style.height='auto';
+  streaming=true; document.getElementById('sendBtn').disabled=true;
+  setStatus('Thinking','thinking');
+
+  const displayText = text || '[Input provided]';
+  messages.push({role:'user', content:displayText});
+  appendMsg('user', displayText);
+
+  const tLabel=()=>document.getElementById('tLabel');
+
+  // ChromaDB retrieval
+  setStatus('Retrieving vectors','vector');
+  addTrace('🔀','Orchestrator','Routing query to domain agents…');
+  showThinking('Querying ChromaDB vector store via Groq Hub…');
+
+  await new Promise(r=>setTimeout(r,60));
+
+  const {chunks, sources} = queryChromaDB(text, 6);
+  addSimTrace(chunks);
+  addTrace('🔷','ChromaDB',`Retrieved ${chunks.length} chunks`, 'chroma');
+
+  if(tLabel()) tLabel().textContent = `Groq Processing: ${activeDomains.size} domains active…`;
+
+  const systemPrompt = buildSystemPrompt(chunks);
+
+  // PREPARE GROQ API CALL
+  try {
+    // Note: You must provide a valid GROQ API Key if running locally. 
+    // In a production env, this should be handled via a secure proxy.
+    const GROQ_API_KEY = 'YOUR_GROQ_API_KEY'; 
+
+    const body = {
+      model: 'llama-3.1-70b-versatile', // High performance Llama model
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({ role: m.role, content: m.content }))
+      ],
+      temperature: 0.2,
+      max_tokens: 2048
+    };
+
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await resp.json();
+    removeThinking();
+
+    if (data.choices && data.choices[0]) {
+      const answer = data.choices[0].message.content;
+      messages.push({role:'assistant', content:answer});
+      
+      const activeNames = DOMAINS.filter(d=>activeDomains.has(d.id)).map(d=>d.name);
+      appendMsg('assistant', answer, activeNames, null, chunks);
+      
+      addTrace('⚡', 'Groq Inference', `Tokens: ${data.usage.total_tokens} | Time: ${data.usage.total_time.toFixed(2)}s`);
+    } else {
+      throw new Error(data.error?.message || 'Groq API Error');
+    }
+
+  } catch (err) {
+    removeThinking();
+    appendMsg('assistant', `⚠️ **Groq API Error:** ${err.message}. (Ensure API key is configured and CORS is handled)`);
+    addTrace('❌', 'Error', err.message);
+  }
+
+  streaming=false; document.getElementById('sendBtn').disabled=false;
+  setStatus('Ready','ready');
+}
+
+
+/*
+async function sendMessage(){
+  if(streaming) return;
+  const inp=document.getElementById('userInput');
+  const text=inp.value.trim();
+  const imgs=pending.filter(a=>a.type==='image');
+  if(!text&&!imgs.length) return;
+
+  inp.value='';inp.style.height='auto';
+  streaming=true;document.getElementById('sendBtn').disabled=true;
+  setStatus('Thinking','thinking');
+
+  const displayText=text||'[Image attached for analysis]';
+  const imgPreview=imgs.length?imgs[0].preview:null;
+  messages.push({role:'user',content:displayText});
+  appendMsg('user',displayText,null,imgPreview);
+
+  const tLabel=()=>document.getElementById('tLabel');
+
+  // ChromaDB retrieval
+  setStatus('Retrieving vectors','vector');
+  addTrace('🔀','Orchestrator','Routing query to domain agents…');
+  showThinking('Querying ChromaDB vector store…');
+
+  // Small delay to let UI render
+  await new Promise(r=>setTimeout(r,60));
+
+  const {chunks, sources} = queryChromaDB(text||'image analysis', 6);
+  addSimTrace(chunks);
+  addTrace('🔷','ChromaDB',`Retrieved ${chunks.length} chunks (top score: ${chunks.length?chunks[0].score.toFixed(3):'—'})`, 'chroma');
+
+  if(tLabel()) tLabel().textContent=`Routing to ${[...activeDomains].slice(0,2).map(id=>DOMAINS.find(d=>d.id===id)?.name||id).join(', ')}…`;
+
+  const active=DOMAINS.filter(d=>activeDomains.has(d.id));
+  active.slice(0,3).forEach((d,i)=>setTimeout(()=>addTrace('🤖',`${d.name} Agent`,'Processing retrieved context'),200+i*250));
+  if(chips.web) setTimeout(()=>{setStatus('Searching','searching');addTrace('🔍','Web Search','Querying for current standards…');},900);
+  setTimeout(()=>addTrace('⚡','Synthesis','Merging domain expertise with vector context…'),1700);
+  setTimeout(()=>{if(tLabel()) tLabel().textContent='Generating response…';},1500);
+
+  const systemPrompt=buildSystemPrompt(chunks);
+  const tools=chips.web?[{type:'web_search_20250305',name:'web_search'}]:[];
+
+  let userContent;
+  if(imgs.length){
+    userContent=[
+      ...imgs.map(img=>({type:'image',source:{type:'base64',media_type:img.mediaType,data:img.base64}})),
+      {type:'text',text:text||'Analyse this image in the context of enterprise architecture and active domain agents.'}
+    ];
+  } else { userContent=text; }
+
+  const apiMsgs=[
+    ...messages.slice(0,-1).map(m=>({role:m.role,content:m.content})),
+    {role:'user',content:userContent}
+  ];
+
+  const capturedPending=[...pending];
+  pending=[];renderPending();
+
+  try{
+    const body={model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages:apiMsgs};
+    if(tools.length) body.tools=tools;
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+    });
+    const data=await resp.json();
+    removeThinking();
+
+    let answer='';
+    if(data.content) for(const b of data.content) if(b.type==='text') answer+=b.text;
+    if(!answer&&data.error) answer=`⚠️ API Error: ${data.error.message}`;
+    if(!answer) answer='Could not generate a response. Please try again.';
+
+    messages.push({role:'assistant',content:answer});
+    appendMsg('assistant',answer,active.map(d=>d.name).slice(0,5),null,chunks);
+
+    addTrace('✅','Complete',
+      `${active.length} agents · ${chunks.length} ChromaDB chunks · ${answer.length} chars`);
+    const hr=document.createElement('hr');hr.className='trc-div';
+    document.getElementById('trcBody').appendChild(hr);
+
+  }catch(err){
+    removeThinking();
+    appendMsg('assistant','⚠️ Connection error. Please run in the Claude.ai artifact environment.');
+    addTrace('❌','Error',err.message);
+  }
+
+  streaming=false;document.getElementById('sendBtn').disabled=false;
+  setStatus('Ready','ready');
+} */
+
+function clearChat(){
+  messages=[];
+  document.getElementById('messages').innerHTML=`
+    <div class="empty-state" id="emptyState">
+      <div class="ei">🔷</div>
+      <div class="et">Vector-Powered Multi-Domain Intelligence</div>
+      <div class="es">ChromaDB TF-IDF vector store with cosine similarity retrieval. Add Wikipedia articles, documents, or videos — chunks are indexed and semantically retrieved per query.</div>
+      <div class="sugs" id="sugs"></div>
+    </div>`;
+  renderSugs();
+}
+
+function suggest(t){document.getElementById('userInput').value=t;autoResize(document.getElementById('userInput'));sendMessage();}
+
+// ════════════════════════════════════════════════
+//  SUGGESTIONS
+// ════════════════════════════════════════════════
+const SUGS=[
+  'Compare HIPAA and PCI-DSS compliance architectures',
+  'Design a FHIR R4 interoperability platform',
+  'ISO 20022 migration strategy for real-time payments',
+  'IIoT architecture for predictive maintenance',
+  'DevSecOps pipeline for regulated financial services',
+  'Zero Trust architecture for multi-cloud retail',
+  'AI/ML risk model deployment on AWS (SR 11-7)',
+  'Digital twin strategy for smart manufacturing',
+];
+function renderSugs(){
+  const el=document.getElementById('sugs');if(!el) return;
+  const picks=[...SUGS].sort(()=>Math.random()-.5).slice(0,4);
+  el.innerHTML=picks.map(t=>`<span class="sug" onclick="suggest('${t.replace(/'/g,"\\'")}')"> ${t}</span>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+renderAgents();
+renderKb();
+updateToolStat();
+renderSugs();
+indexDomainKnowledge();
+</script>
+</body>
+</html>
